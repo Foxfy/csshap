@@ -1,0 +1,126 @@
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+
+namespace session1
+{
+    public partial class LoginForm : Form1
+    {
+        public LoginForm()
+        {
+            InitializeComponent();
+            flogin = this;
+            if (Properties.Settings.Default.currenUser != "")
+            {
+                currenLogin = db.Users.Where(x => x.GUID == Guid.Parse(Properties.Settings.Default.currenUser)).FirstOrDefault();
+                if (Properties.Settings.Default.dataUser != "")
+                {
+                    userData = db.Users.Where(x => x.GUID == Guid.Parse(Properties.Settings.Default.dataUser)).FirstOrDefault();
+                }
+                if (currenLogin != null)
+                {
+                    new MainForm().Show();
+                }
+            }
+        }
+
+        private void LoginForm_Load(object sender, EventArgs e)
+        {
+            CenterToScreen();
+            textBox2.Text = "mahdi";
+            textBox3.Text = "1234";
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            Application.Exit();
+        }
+
+        private void checkBox2_CheckedChanged(object sender, EventArgs e)
+        {
+            textBox3.UseSystemPasswordChar = checkBox2.Checked ? false : true;
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            if (textBox2.Text == "")
+            {
+                msgWar("Please enter Username.");
+                return;
+            }
+            if (textBox3.Text == "")
+            {
+                msgWar("Please enter Password.");
+                return;
+            }
+            if (textBox1.Text == textBox2.Text)
+            {
+                msgWar("Can't found Username same feild Employee.");
+                return;
+            }
+            if (textBox1.Text != "")
+            {
+                currenLogin = db.Users.Where(x => x.Username == textBox1.Text && x.Password == textBox3.Text).FirstOrDefault();
+                userData = db.Users.Where(x => x.Username == textBox2.Text).FirstOrDefault();
+            }
+            else
+            {
+                currenLogin = db.Users.Where(x => x.Username == textBox2.Text && x.Password == textBox3.Text).FirstOrDefault();
+            }
+            if (currenLogin != null)
+            {
+                if (textBox1.Text != "")
+                {
+                    if (userData == null)
+                    {
+                        msgWar("Can't found Username Detail");
+                        return;
+                    }
+                }
+                new MainForm().Show();
+                if (checkBox1.Checked)
+                {
+                    if (currenLogin.UserTypeID == 1)
+                    {
+                        Properties.Settings.Default.currenUser = currenLogin.GUID.ToString();
+                        Properties.Settings.Default.dataUser = userData.GUID.ToString();
+                        Properties.Settings.Default.Save();
+                    }
+                    else
+                    {
+                        Properties.Settings.Default.currenUser = currenLogin.GUID.ToString();
+                        Properties.Settings.Default.Save();
+                    }
+
+                }
+                else
+                {
+                    Properties.Settings.Default.currenUser = "";
+                    Properties.Settings.Default.dataUser = "";
+                    Properties.Settings.Default.Save();
+                }
+                textBox1.Clear();
+                textBox2.Clear();
+                textBox3.Clear();
+                Hide();
+            }
+        }
+
+        private void linkLabel1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            new RegisterForm().Show();
+            Hide();
+        }
+
+        private void LoginForm_Shown(object sender, EventArgs e)
+        {
+            if (currenLogin != null) Hide();
+        }
+    }
+}
