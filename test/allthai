@@ -68,20 +68,19 @@ public class NumericToThaiConverter {
             return thaiNumerals[0];
         }
 
-        if (intValue < 10) {
-            return "หนึ่ง" + getDigitPositionWord(0); // Ed's name for units digit
-        }
-
         StringBuilder thaiWords = new StringBuilder();
         int digitPosition = 0;
 
         while (intValue > 0) {
             long digit = intValue % 10;
             if (digit > 0) {
-                if (digitPosition == 1 && digit == 1) {
-                    thaiWords.insert(0, "สิบ ");
+                if (digitPosition % 6 == 0) {
+                    thaiWords.insert(0, getUnitWord(digitPosition / 6) + " ");
+                }
+                if (digitPosition % 6 == 1 && digit == 1) {
+                    thaiWords.insert(0, "เอ็ด ");
                 } else {
-                    thaiWords.insert(0, thaiNumerals[(int) digit] + getDigitPositionWord(digitPosition) + " ");
+                    thaiWords.insert(0, thaiNumerals[(int) digit] + getDigitPositionWord(digitPosition % 6) + " ");
                 }
             }
             intValue /= 10;
@@ -106,6 +105,33 @@ public class NumericToThaiConverter {
     }
 
     private static String getDigitPositionWord(int digitPosition) {
-        return (digitPosition % 2 == 0) ? "สิบ" : "";
+        switch (digitPosition % 6) {
+            case 0:
+                return "ล้าน";
+            case 1:
+                return "สิบ";
+            case 2:
+                return "ร้อย";
+            case 3:
+                return "พัน";
+            case 4:
+                return "หมื่น";
+            case 5:
+                return "แสน";
+            default:
+                return "";
+        }
+    }
+
+    private static String getUnitWord(int unitPosition) {
+        switch (unitPosition) {
+            case 1:
+                return "ล้าน";
+            case 2:
+                return "ล้านล้าน";
+            // Add more units as needed
+            default:
+                return "";
+        }
     }
 }
