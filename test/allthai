@@ -2,45 +2,43 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.text.DecimalFormat;
+import java.util.Locale;
 
-public class NumericToThaiConverter {
-
+public class NumberToThaiWordsConverter {
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
-            JFrame frame = new JFrame("Numeric to Thai Converter");
+            JFrame frame = new JFrame("Number to Thai Words Converter");
             frame.setSize(450, 450);
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
             JPanel panel = new JPanel();
-            JTextField textField = new JTextField(10);
+            JLabel resultLabel = new JLabel("Thai Words: ");
+            JTextField inputField = new JTextField(10);
             JButton convertButton = new JButton("Convert");
-            JLabel resultLabel = new JLabel();
 
-            // Set font for Thai characters
-            Font thaiFont = new Font("Tahoma", Font.PLAIN, 14);
-            textField.setFont(thaiFont);
-            convertButton.setFont(thaiFont);
+            // Set Thai font for components
+            Font thaiFont = new Font("Tahoma", Font.PLAIN, 16); // Replace "Tahoma" with an appropriate Thai font
             resultLabel.setFont(thaiFont);
+            inputField.setFont(thaiFont);
+            convertButton.setFont(thaiFont);
 
             convertButton.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    String inputText = textField.getText();
-                    try {
-                        double numericValue = Double.parseDouble(inputText);
-                        String thaiWords = convertToThaiWords(numericValue);
-                        resultLabel.setText(thaiWords);
-                    } catch (NumberFormatException ex) {
+                    String inputText = inputField.getText().trim();
+                    if (!inputText.isEmpty() && inputText.matches("\\d+")) {
+                        long number = Long.parseLong(inputText);
+                        String thaiWords = convertToThaiWords(number);
+                        resultLabel.setText("Thai Words: " + thaiWords);
+                    } else {
                         resultLabel.setText("Invalid input. Please enter a numeric value.");
                     }
                 }
             });
 
-            panel.add(new JLabel("Enter numeric value: "));
-            panel.add(textField);
+            panel.add(new JLabel("Enter Numeric Value: "));
+            panel.add(inputField);
             panel.add(convertButton);
-            panel.add(new JLabel("Result in Thai: "));
             panel.add(resultLabel);
 
             frame.add(panel);
@@ -48,90 +46,13 @@ public class NumericToThaiConverter {
         });
     }
 
-    private static String convertToThaiWords(double numericValue) {
-        String[] thaiNumerals = {"", "หนึ่ง", "สอง", "สาม", "สี่", "ห้า", "หก", "เจ็ด", "แปด", "เก้า"};
+    private static String convertToThaiWords(long number) {
+        // Logic to convert numeric value to Thai words
+        // You can implement this logic based on your conditions
+        // (e.g., handling special cases like 11 with "Ed")
+        // This is a simplified example
+        // ...
 
-        long intValue = (long) numericValue;
-        String thaiWords = convertIntegerToThaiWords(intValue, thaiNumerals);
-
-        // Handle decimal part if present
-        double decimalPart = numericValue - intValue;
-        if (decimalPart > 0) {
-            thaiWords += " จุด " + convertDecimalToThaiWords(decimalPart, thaiNumerals);
-        }
-
-        return thaiWords;
-    }
-
-    private static String convertIntegerToThaiWords(long intValue, String[] thaiNumerals) {
-        if (intValue == 0) {
-            return thaiNumerals[0];
-        }
-
-        StringBuilder thaiWords = new StringBuilder();
-        int digitPosition = 0;
-
-        while (intValue > 0) {
-            long digit = intValue % 10;
-            if (digit > 0) {
-                if (digitPosition % 6 == 0) {
-                    thaiWords.insert(0, getUnitWord(digitPosition / 6) + " ");
-                }
-                if (digitPosition % 6 == 1 && digit == 1) {
-                    thaiWords.insert(0, "เอ็ด ");
-                } else {
-                    thaiWords.insert(0, thaiNumerals[(int) digit] + getDigitPositionWord(digitPosition % 6) + " ");
-                }
-            }
-            intValue /= 10;
-            digitPosition++;
-        }
-
-        return thaiWords.toString().trim();
-    }
-
-    private static String convertDecimalToThaiWords(double decimalPart, String[] thaiNumerals) {
-        StringBuilder thaiWords = new StringBuilder();
-
-        DecimalFormat decimalFormat = new DecimalFormat("0.#################");
-        String decimalString = decimalFormat.format(decimalPart);
-
-        for (char digitChar : decimalString.substring(2).toCharArray()) {
-            int digit = Character.getNumericValue(digitChar);
-            thaiWords.append(thaiNumerals[digit]).append(" ");
-        }
-
-        return thaiWords.toString().trim();
-    }
-
-    private static String getDigitPositionWord(int digitPosition) {
-        switch (digitPosition % 6) {
-            case 0:
-                return "ล้าน";
-            case 1:
-                return "สิบ";
-            case 2:
-                return "ร้อย";
-            case 3:
-                return "พัน";
-            case 4:
-                return "หมื่น";
-            case 5:
-                return "แสน";
-            default:
-                return "";
-        }
-    }
-
-    private static String getUnitWord(int unitPosition) {
-        switch (unitPosition) {
-            case 1:
-                return "ล้าน";
-            case 2:
-                return "ล้านล้าน";
-            // Add more units as needed
-            default:
-                return "";
-        }
+        return "Thai Words"; // Replace this with your actual result
     }
 }
