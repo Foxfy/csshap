@@ -48,11 +48,30 @@ public class NumberToWordsConverter extends JFrame {
     }
 
     private String convertToThaiWords(long number) {
-        // Your logic for converting the number to Thai words goes here
-        // Implement the logic to handle conditions like exceeding the tens digit or ending with 1
-        // You may want to use a library for converting numbers to words in Thai
-        // For simplicity, let's assume a placeholder result for now
-        return "Thai words for " + number;
+        if (number == 0) {
+            return "ศูนย์";
+        }
+
+        String[] units = {"", "หนึ่ง", "สอง", "สาม", "สี่", "ห้า", "หก", "เจ็ด", "แปด", "เก้า"};
+        String[] positions = {"", "สิบ", "ร้อย", "พัน", "หมื่น", "แสน", "ล้าน"};
+
+        StringBuilder thaiWords = new StringBuilder();
+        int positionIndex = 0;
+
+        while (number > 0) {
+            long digit = number % 10;
+            if (digit > 0) {
+                if (digit == 1 && positionIndex == 1) {
+                    thaiWords.insert(0, "เอ็ด");
+                } else {
+                    thaiWords.insert(0, units[(int) digit] + positions[positionIndex]);
+                }
+            }
+            number /= 10;
+            positionIndex++;
+        }
+
+        return thaiWords.toString();
     }
 
     public static void main(String[] args) {
@@ -63,37 +82,4 @@ public class NumberToWordsConverter extends JFrame {
             }
         });
     }
-}
-
-
-
-
-
-
-
-private String convertToThaiWords(long number) {
-    if (number == 0) {
-        return "ศูนย์";
-    }
-
-    String[] units = {"", "หนึ่ง", "สอง", "สาม", "สี่", "ห้า", "หก", "เจ็ด", "แปด", "เก้า"};
-    String[] positions = {"", "สิบ", "ร้อย", "พัน", "หมื่น", "แสน", "ล้าน"};
-
-    StringBuilder thaiWords = new StringBuilder();
-    int positionIndex = 0;
-
-    while (number > 0) {
-        long digit = number % 10;
-        if (digit > 0) {
-            if (digit == 1 && positionIndex == 1) {
-                thaiWords.insert(0, "เอ็ด");
-            } else {
-                thaiWords.insert(0, units[(int) digit] + positions[positionIndex]);
-            }
-        }
-        number /= 10;
-        positionIndex++;
-    }
-
-    return thaiWords.toString();
 }
