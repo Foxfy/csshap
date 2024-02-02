@@ -2,91 +2,110 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.text.DecimalFormat;
 
 public class NumericToThaiConverter {
+
     public static void main(String[] args) {
-        JFrame frame = new JFrame("Numeric to Thai Converter");
-        frame.setSize(450, 450);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        SwingUtilities.invokeLater(() -> {
+            JFrame frame = new JFrame("Numeric to Thai Converter");
+            frame.setSize(450, 450);
+            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        JPanel panel = new JPanel();
-        frame.add(panel);
-        placeComponents(panel);
+            JPanel panel = new JPanel();
+            JTextField textField = new JTextField(10);
+            JButton convertButton = new JButton("Convert");
+            JLabel resultLabel = new JLabel();
 
-        frame.setVisible(true);
-    }
+            // Set font for Thai characters
+            Font thaiFont = new Font("Tahoma", Font.PLAIN, 14);
+            textField.setFont(thaiFont);
+            convertButton.setFont(thaiFont);
+            resultLabel.setFont(thaiFont);
 
-    private static void placeComponents(JPanel panel) {
-        panel.setLayout(null);
-
-        JTextField textField = new JTextField(20);
-        textField.setBounds(30, 30, 150, 30);
-        panel.add(textField);
-
-        JButton convertButton = new JButton("Convert");
-        convertButton.setBounds(200, 30, 100, 30);
-        panel.add(convertButton);
-
-        JLabel resultLabel = new JLabel("Result: ");
-        resultLabel.setBounds(30, 80, 300, 30);
-
-        // Set Thai font for the JLabel
-        Font thaiFont = new Font("Tahoma", Font.PLAIN, 16);  // Replace "Tahoma" with your Thai font
-        resultLabel.setFont(thaiFont);
-
-        panel.add(resultLabel);
-
-        convertButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                String inputText = textField.getText().trim();
-                if (!inputText.isEmpty()) {
+            convertButton.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    String inputText = textField.getText();
                     try {
-                        long numericValue = Long.parseLong(inputText);
+                        double numericValue = Double.parseDouble(inputText);
                         String thaiWords = convertToThaiWords(numericValue);
-                        resultLabel.setText("Result: " + thaiWords);
+                        resultLabel.setText(thaiWords);
                     } catch (NumberFormatException ex) {
                         resultLabel.setText("Invalid input. Please enter a numeric value.");
                     }
-                } else {
-                    resultLabel.setText("Please enter a numeric value.");
                 }
-            }
+            });
+
+            panel.add(new JLabel("Enter numeric value: "));
+            panel.add(textField);
+            panel.add(convertButton);
+            panel.add(new JLabel("Result in Thai: "));
+            panel.add(resultLabel);
+
+            frame.add(panel);
+            frame.setVisible(true);
         });
     }
 
-    private static String convertToThaiWords(long numericValue) {
-        if (numericValue == 0) {
-            return "ศูนย์";  // Zero in Thai
+    private static String convertToThaiWords(double numericValue) {
+        String[] thaiNumerals = {"", "หนึ่ง", "สอง", "สาม", "สี่", "ห้า", "หก", "เจ็ด", "แปด", "เก้า"};
+
+        long intValue = (long) numericValue;
+        String thaiWords = convertIntegerToThaiWords(intValue, thaiNumerals);
+
+        // Handle decimal part if present
+        double decimalPart = numericValue - intValue;
+        if (decimalPart > 0) {
+            thaiWords += " จุด " + convertDecimalToThaiWords(decimalPart, thaiNumerals);
         }
 
-        String[] thaiDigits = {"", "หนึ่ง", "สอง", "สาม", "สี่", "ห้า", "หก", "เจ็ด", "แปด", "เก้า"};
-        String[] thaiPlaces = {"", "สิบ", "ร้อย", "พัน", "หมื่น", "แสน", "ล้าน"};
+        return thaiWords;
+    }
+
+    private static String convertIntegerToThaiWords(long intValue, String[] thaiNumerals) {
+        if (intValue == 0) {
+            return thaiNumerals[0];
+        }
+
+        if (intValue < 10) {
+            return "หนึ่ง" + getDigitPositionWord(0); // Ed's name for units digit
+        }
 
         StringBuilder thaiWords = new StringBuilder();
-        String numericString = String.valueOf(numericValue);
-        int length = numericString.length();
+        int digitPosition = 0;
 
-        for (int i = 0; i < length; i++) {
-            int digit = Character.getNumericValue(numericString.charAt(i));
-            int place = length - i - 1;
-
-            if (digit != 0) {
-                if (place == 1 && digit == 1) {
-                    thaiWords.append("Ed");
+        while (intValue > 0) {
+            long digit = intValue % 10;
+            if (digit > 0) {
+                if (digitPosition == 1 && digit == 1) {
+                    thaiWords.insert(0, "สิบ ");
                 } else {
-                    thaiWords.append(thaiDigits[digit]);
+                    thaiWords.insert(0, thaiNumerals[(int) digit] + getDigitPositionWord(digitPosition) + " ");
                 }
-
-                thaiWords.append(thaiPlaces[place]);
             }
-
-            // Add space between each group of three digits
-            if (place % 3 == 0 && i < length - 1 && Character.getNumericValue(numericString.charAt(i + 1)) != 0) {
-                thaiWords.append(" ");
-            }
+            intValue /= 10;
+            digitPosition++;
         }
 
-        return thaiWords.toString();
+        return thaiWords.toString().trim();
+    }
+
+    private static String convertDecimalToThaiWords(double decimalPart, String[] thaiNumerals) {
+        StringBuilder thaiWords = new StringBuilder();
+
+        DecimalFormat decimalFormat = new DecimalFormat("0.#################");
+        String decimalString = decimalFormat.format(decimalPart);
+
+        for (char digitChar : decimalString.substring(2).toCharArray()) {
+            int digit = Character.getNumericValue(digitChar);
+            thaiWords.append(thaiNumerals[digit]).append(" ");
+        }
+
+        return thaiWords.toString().trim();
+    }
+
+    private static String getDigitPositionWord(int digitPosition) {
+        return (digitPosition % 2 == 0) ? "สิบ" : "";
     }
 }
