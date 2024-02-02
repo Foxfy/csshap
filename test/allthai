@@ -3,91 +3,97 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-public class NumberToThaiWordsConverter {
+public class NumberToWordsConverter extends JFrame {
+    private JTextField textField;
+    private JLabel resultLabel;
+
+    public NumberToWordsConverter() {
+        setTitle("Number to Thai Words Converter");
+        setSize(450, 450);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+        JPanel mainPanel = new JPanel(new BorderLayout());
+
+        textField = new JTextField();
+        JButton convertButton = new JButton("Convert");
+        resultLabel = new JLabel();
+
+        convertButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                convertAndDisplay();
+            }
+        });
+
+        mainPanel.add(textField, BorderLayout.NORTH);
+        mainPanel.add(convertButton, BorderLayout.CENTER);
+        mainPanel.add(resultLabel, BorderLayout.SOUTH);
+
+        add(mainPanel);
+
+        setLocationRelativeTo(null); // Center the JFrame on the screen
+        setVisible(true);
+    }
+
+    private void convertAndDisplay() {
+        String inputText = textField.getText().trim();
+
+        if (!inputText.isEmpty() && inputText.matches("\\d+")) {
+            long number = Long.parseLong(inputText);
+            String thaiWords = convertToThaiWords(number);
+            resultLabel.setText(thaiWords);
+        } else {
+            resultLabel.setText("Invalid input. Please enter a numeric value.");
+        }
+    }
+
+    private String convertToThaiWords(long number) {
+        // Your logic for converting the number to Thai words goes here
+        // Implement the logic to handle conditions like exceeding the tens digit or ending with 1
+        // You may want to use a library for converting numbers to words in Thai
+        // For simplicity, let's assume a placeholder result for now
+        return "Thai words for " + number;
+    }
+
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            JFrame frame = new JFrame("Number to Thai Words Converter");
-            frame.setSize(450, 450);
-            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-            JPanel panel = new JPanel();
-            JLabel resultLabel = new JLabel("Thai Words: ");
-            JTextField inputField = new JTextField(10);
-            JButton convertButton = new JButton("Convert");
-
-            // Set Thai font for components
-            Font thaiFont = new Font("Tahoma", Font.PLAIN, 16); // Replace "Tahoma" with an appropriate Thai font
-            resultLabel.setFont(thaiFont);
-            inputField.setFont(thaiFont);
-            convertButton.setFont(thaiFont);
-
-            convertButton.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    String inputText = inputField.getText().trim();
-                    if (!inputText.isEmpty() && inputText.matches("\\d+")) {
-                        long number = Long.parseLong(inputText);
-                        if (number >= 0 && number <= 1000000) {
-                            String thaiWords = convertToThaiWords(number);
-                            resultLabel.setText("Thai Words: " + thaiWords);
-                        } else {
-                            resultLabel.setText("Number must be between 0 and 1 million.");
-                        }
-                    } else {
-                        resultLabel.setText("Invalid input. Please enter a numeric value.");
-                    }
-                }
-            });
-
-            panel.add(new JLabel("Enter Numeric Value (0-1 million): "));
-            panel.add(inputField);
-            panel.add(convertButton);
-            panel.add(resultLabel);
-
-            frame.add(panel);
-            frame.setVisible(true);
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                new NumberToWordsConverter();
+            }
         });
     }
+}
 
-    private static String convertToThaiWords(long number) {
-        if (number == 0) {
-            return "ศูนย์"; // Special case for zero
-        }
 
-        // Define Thai numerals
-        String[] thaiNumerals = {"", "หนึ่ง", "สอง", "สาม", "สี่", "ห้า", "หก", "เจ็ด", "แปด", "เก้า"};
 
-        // Handle special case for tens place being 1
-        if (number >= 10 && number % 10 == 1) {
-            return "Ed" + convertToThaiWords(number / 10 * 10);
-        }
 
-        // Continue with regular conversion logic
-        String result = "";
 
-        // Convert thousands
-        if (number >= 1000) {
-            result += thaiNumerals[(int) (number / 1000)] + "พัน";
-            number %= 1000;
-        }
 
-        // Convert hundreds
-        if (number >= 100) {
-            result += thaiNumerals[(int) (number / 100)] + "ร้อย";
-            number %= 100;
-        }
 
-        // Convert tens
-        if (number >= 10) {
-            result += thaiNumerals[(int) (number / 10)] + "สิบ";
-            number %= 10;
-        }
-
-        // Convert ones
-        if (number > 0) {
-            result += thaiNumerals[(int) number];
-        }
-
-        return result;
+private String convertToThaiWords(long number) {
+    if (number == 0) {
+        return "ศูนย์";
     }
+
+    String[] units = {"", "หนึ่ง", "สอง", "สาม", "สี่", "ห้า", "หก", "เจ็ด", "แปด", "เก้า"};
+    String[] positions = {"", "สิบ", "ร้อย", "พัน", "หมื่น", "แสน", "ล้าน"};
+
+    StringBuilder thaiWords = new StringBuilder();
+    int positionIndex = 0;
+
+    while (number > 0) {
+        long digit = number % 10;
+        if (digit > 0) {
+            if (digit == 1 && positionIndex == 1) {
+                thaiWords.insert(0, "เอ็ด");
+            } else {
+                thaiWords.insert(0, units[(int) digit] + positions[positionIndex]);
+            }
+        }
+        number /= 10;
+        positionIndex++;
+    }
+
+    return thaiWords.toString();
 }
