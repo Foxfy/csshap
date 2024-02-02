@@ -2,7 +2,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.Locale;
 
 public class NumberToThaiWordsConverter {
     public static void main(String[] args) {
@@ -28,15 +27,19 @@ public class NumberToThaiWordsConverter {
                     String inputText = inputField.getText().trim();
                     if (!inputText.isEmpty() && inputText.matches("\\d+")) {
                         long number = Long.parseLong(inputText);
-                        String thaiWords = convertToThaiWords(number);
-                        resultLabel.setText("Thai Words: " + thaiWords);
+                        if (number >= 0 && number <= 1000000) {
+                            String thaiWords = convertToThaiWords(number);
+                            resultLabel.setText("Thai Words: " + thaiWords);
+                        } else {
+                            resultLabel.setText("Number must be between 0 and 1 million.");
+                        }
                     } else {
                         resultLabel.setText("Invalid input. Please enter a numeric value.");
                     }
                 }
             });
 
-            panel.add(new JLabel("Enter Numeric Value: "));
+            panel.add(new JLabel("Enter Numeric Value (0-1 million): "));
             panel.add(inputField);
             panel.add(convertButton);
             panel.add(resultLabel);
@@ -47,12 +50,44 @@ public class NumberToThaiWordsConverter {
     }
 
     private static String convertToThaiWords(long number) {
-        // Logic to convert numeric value to Thai words
-        // You can implement this logic based on your conditions
-        // (e.g., handling special cases like 11 with "Ed")
-        // This is a simplified example
-        // ...
+        if (number == 0) {
+            return "ศูนย์"; // Special case for zero
+        }
 
-        return "Thai Words"; // Replace this with your actual result
+        // Define Thai numerals
+        String[] thaiNumerals = {"", "หนึ่ง", "สอง", "สาม", "สี่", "ห้า", "หก", "เจ็ด", "แปด", "เก้า"};
+
+        // Handle special case for tens place being 1
+        if (number >= 10 && number % 10 == 1) {
+            return "Ed" + convertToThaiWords(number / 10 * 10);
+        }
+
+        // Continue with regular conversion logic
+        String result = "";
+
+        // Convert thousands
+        if (number >= 1000) {
+            result += thaiNumerals[(int) (number / 1000)] + "พัน";
+            number %= 1000;
+        }
+
+        // Convert hundreds
+        if (number >= 100) {
+            result += thaiNumerals[(int) (number / 100)] + "ร้อย";
+            number %= 100;
+        }
+
+        // Convert tens
+        if (number >= 10) {
+            result += thaiNumerals[(int) (number / 10)] + "สิบ";
+            number %= 10;
+        }
+
+        // Convert ones
+        if (number > 0) {
+            result += thaiNumerals[(int) number];
+        }
+
+        return result;
     }
 }
