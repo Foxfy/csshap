@@ -1,0 +1,92 @@
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+public class NumericToThaiConverter {
+    public static void main(String[] args) {
+        JFrame frame = new JFrame("Numeric to Thai Converter");
+        frame.setSize(450, 450);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+        JPanel panel = new JPanel();
+        frame.add(panel);
+        placeComponents(panel);
+
+        frame.setVisible(true);
+    }
+
+    private static void placeComponents(JPanel panel) {
+        panel.setLayout(null);
+
+        JTextField textField = new JTextField(20);
+        textField.setBounds(30, 30, 150, 30);
+        panel.add(textField);
+
+        JButton convertButton = new JButton("Convert");
+        convertButton.setBounds(200, 30, 100, 30);
+        panel.add(convertButton);
+
+        JLabel resultLabel = new JLabel("Result: ");
+        resultLabel.setBounds(30, 80, 300, 30);
+
+        // Set Thai font for the JLabel
+        Font thaiFont = new Font("Tahoma", Font.PLAIN, 16);  // Replace "Tahoma" with your Thai font
+        resultLabel.setFont(thaiFont);
+
+        panel.add(resultLabel);
+
+        convertButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String inputText = textField.getText().trim();
+                if (!inputText.isEmpty()) {
+                    try {
+                        long numericValue = Long.parseLong(inputText);
+                        String thaiWords = convertToThaiWords(numericValue);
+                        resultLabel.setText("Result: " + thaiWords);
+                    } catch (NumberFormatException ex) {
+                        resultLabel.setText("Invalid input. Please enter a numeric value.");
+                    }
+                } else {
+                    resultLabel.setText("Please enter a numeric value.");
+                }
+            }
+        });
+    }
+
+    private static String convertToThaiWords(long numericValue) {
+        if (numericValue == 0) {
+            return "ศูนย์";  // Zero in Thai
+        }
+
+        String[] thaiDigits = {"", "หนึ่ง", "สอง", "สาม", "สี่", "ห้า", "หก", "เจ็ด", "แปด", "เก้า"};
+        String[] thaiPlaces = {"", "สิบ", "ร้อย", "พัน", "หมื่น", "แสน", "ล้าน"};
+
+        StringBuilder thaiWords = new StringBuilder();
+        String numericString = String.valueOf(numericValue);
+        int length = numericString.length();
+
+        for (int i = 0; i < length; i++) {
+            int digit = Character.getNumericValue(numericString.charAt(i));
+            int place = length - i - 1;
+
+            if (digit != 0) {
+                if (place == 1 && digit == 1) {
+                    thaiWords.append("Ed");
+                } else {
+                    thaiWords.append(thaiDigits[digit]);
+                }
+
+                thaiWords.append(thaiPlaces[place]);
+            }
+
+            // Add space between each group of three digits
+            if (place % 3 == 0 && i < length - 1 && Character.getNumericValue(numericString.charAt(i + 1)) != 0) {
+                thaiWords.append(" ");
+            }
+        }
+
+        return thaiWords.toString();
+    }
+}
